@@ -1,57 +1,72 @@
+import 'package:flutter/material.dart';
 import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:contextual_cards/data/models/entity.dart';
 import 'package:contextual_cards/utils/hex_color.dart';
-import 'package:flutter/material.dart';
 
 class HC6Card extends StatelessWidget {
   final CardModel card;
+  final bool isScrollable;
 
-  const HC6Card({super.key, required this.card});
+  const HC6Card({super.key, required this.card, required this.isScrollable});
 
   @override
   Widget build(BuildContext context) {
     const double iconHeight = 40.0;
     final double aspectRatio = card.icon?.aspectRatio ?? 1.0;
+    final double width = iconHeight * aspectRatio;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+      margin: isScrollable
+          ? const EdgeInsets.symmetric(vertical: 5)
+          : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: card.bgColor ?? Colors.grey[300],
+        color: card.bgColor ?? Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
         children: [
-          if (card.icon != null)
-            SizedBox(
-              height: iconHeight,
-              width: iconHeight * aspectRatio,
-              child: Image.network(
-                card.icon!.imageUrl!,
-                fit: BoxFit.contain,
-              ),
-            ),
-          const SizedBox(width: 8),
-          if (card.formattedTitle != null)
-            Expanded(
-              child: _buildFormattedText(
-                card.formattedTitle!.text,
-                card.formattedTitle!.entities,
-                card.formattedTitle?.align ?? 'left',
-              ),
-            )
-          else if (card.title?.trim().isNotEmpty == true)
-            Expanded(
-              child: Text(
-                card.title!,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (card.icon != null)
+                SizedBox(
+                  height: iconHeight,
+                  width: width,
+                  child: Image.network(
+                    card.icon!.imageUrl!,
+                    fit: BoxFit.contain,
+                  ),
                 ),
-              ),
-            ),
-          const Icon(Icons.arrow_forward_ios, size: 16),
+              const SizedBox(width: 6),
+              if (card.formattedTitle != null)
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: _buildFormattedText(
+                    card.formattedTitle!.text,
+                    card.formattedTitle!.entities,
+                    card.formattedTitle?.align ?? 'left',
+                  ),
+                )
+              else if (card.title?.trim().isNotEmpty == true)
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: Text(
+                    card.title!,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Icon(Icons.arrow_forward_ios, size: 16),
+          ),
         ],
       ),
     );

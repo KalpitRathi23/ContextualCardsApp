@@ -1,9 +1,9 @@
 import 'dart:ui';
+import 'package:contextual_cards/utils/hex_color.dart';
 import 'formatted_text.dart';
 import 'card_image.dart';
 import 'call_to_action.dart';
 import 'gradient.dart';
-import '../../utils/hex_color.dart';
 
 class CardModel {
   final int? id;

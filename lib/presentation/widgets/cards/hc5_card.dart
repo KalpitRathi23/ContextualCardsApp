@@ -1,22 +1,28 @@
+import 'package:flutter/material.dart';
 import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:contextual_cards/data/models/entity.dart';
-import 'package:flutter/material.dart';
+import 'package:contextual_cards/utils/hex_color.dart';
 
 class HC5Card extends StatelessWidget {
   final CardModel card;
+  final bool isScrollable;
 
-  const HC5Card({super.key, required this.card});
+  const HC5Card({super.key, required this.card, required this.isScrollable});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double width = constraints.maxWidth;
+        double width = isScrollable
+            ? MediaQuery.of(context).size.width - 50
+            : constraints.maxWidth;
         final double aspectRatio = card.bgImage?.aspectRatio ?? 1.0;
         final double height = width / aspectRatio;
 
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+          margin: isScrollable
+              ? const EdgeInsets.symmetric(vertical: 5)
+              : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
           padding: const EdgeInsets.all(16),
           width: width,
           height: height,
@@ -70,9 +76,7 @@ class HC5Card extends StatelessWidget {
         spans.add(TextSpan(
           text: entity.text,
           style: TextStyle(
-            color: entity.color != null
-                ? Color(int.parse(entity.color!.replaceFirst('#', '0xFF')))
-                : Colors.white,
+            color: HexColor.fromHex(entity.color) ?? Colors.white,
             fontSize: entity.fontSize?.toDouble() ?? 20,
             fontStyle: entity.fontStyle == "italic"
                 ? FontStyle.italic

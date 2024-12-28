@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/card_group.dart';
+import 'package:contextual_cards/data/models/card_group.dart';
+import 'package:contextual_cards/data/models/card_model.dart';
 
 class CardProvider extends ChangeNotifier {
   List<CardGroup> cardGroups = [];

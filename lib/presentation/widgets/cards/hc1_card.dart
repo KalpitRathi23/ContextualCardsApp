@@ -1,6 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:contextual_cards/data/models/entity.dart';
-import 'package:flutter/material.dart';
+import 'package:contextual_cards/utils/hex_color.dart';
 
 class HC1Card extends StatelessWidget {
   final CardModel card;
@@ -15,7 +16,7 @@ class HC1Card extends StatelessWidget {
 
     return Container(
       width: isScrollable
-          ? MediaQuery.of(context).size.width - 65
+          ? MediaQuery.of(context).size.width - 50
           : (MediaQuery.of(context).size.width - 65) / 2,
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(16),
@@ -101,7 +102,7 @@ class HC1Card extends StatelessWidget {
           text: entity.text,
           style: TextStyle(
             color: entity.color != null
-                ? Color(int.parse(entity.color!.replaceFirst('#', '0xFF')))
+                ? HexColor.fromHex(entity.color)
                 : baseStyle.color,
             fontSize: entity.fontSize?.toDouble() ?? baseStyle.fontSize,
             fontStyle: entity.fontStyle == "italic"

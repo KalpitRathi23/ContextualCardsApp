@@ -1,6 +1,7 @@
-import 'dart:math';
-import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:flutter/material.dart';
+import 'package:contextual_cards/data/models/card_model.dart';
+import 'package:contextual_cards/utils/gradient_utils.dart';
+import 'package:contextual_cards/utils/hex_color.dart';
 
 class HC9Card extends StatelessWidget {
   final CardModel card;
@@ -15,11 +16,6 @@ class HC9Card extends StatelessWidget {
             ? height * card.bgImage!.aspectRatio!
             : 100;
 
-    Alignment calculateAlignment(double angle) {
-      final double radians = angle * (pi / 180);
-      return Alignment(cos(radians), sin(radians));
-    }
-
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(16),
@@ -28,13 +24,13 @@ class HC9Card extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: card.bgGradient != null
             ? LinearGradient(
-                colors: card.bgGradient!.colors.map((hex) {
-                  return Color(int.parse(hex.replaceFirst('#', '0xFF')));
-                }).toList(),
-                begin: calculateAlignment(card.bgGradient!.angle.toDouble()),
-                end: calculateAlignment(
-                  (card.bgGradient!.angle.toDouble() + 180) % 360,
-                ),
+                colors: card.bgGradient!.colors
+                    .map((hex) => HexColor.fromHex(hex) ?? Colors.transparent)
+                    .toList(),
+                begin: GradientUtils.calculateAlignment(
+                    card.bgGradient!.angle.toDouble()),
+                end: GradientUtils.calculateAlignment(
+                    (card.bgGradient!.angle.toDouble() + 180) % 360),
               )
             : null,
         borderRadius: BorderRadius.circular(12),

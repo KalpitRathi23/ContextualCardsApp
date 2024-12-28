@@ -1,18 +1,20 @@
+import 'package:flutter/material.dart';
 import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:contextual_cards/data/models/entity.dart';
 import 'package:contextual_cards/utils/hex_color.dart';
-import 'package:flutter/material.dart';
 
 class HC3Card extends StatefulWidget {
   final CardModel card;
   final Function(CardModel) onRemindLater;
   final Function(CardModel) onDismissNow;
+  final bool isScrollable;
 
   const HC3Card({
     super.key,
     required this.card,
     required this.onRemindLater,
     required this.onDismissNow,
+    required this.isScrollable,
   });
 
   @override
@@ -143,14 +145,18 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
   Widget _buildCard() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double width = constraints.maxWidth;
+        double width = widget.isScrollable
+            ? MediaQuery.of(context).size.width - 50
+            : constraints.maxWidth;
         final double height = widget.card.bgImage?.aspectRatio != null
             ? width / widget.card.bgImage!.aspectRatio!
-            : 200;
+            : 420;
 
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-          height: height,
+          margin: widget.isScrollable
+              ? const EdgeInsets.symmetric(vertical: 5)
+              : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+          height: widget.isScrollable ? 420 : height,
           width: width,
           decoration: BoxDecoration(
             color: widget.card.bgColor ?? Colors.grey[400],
