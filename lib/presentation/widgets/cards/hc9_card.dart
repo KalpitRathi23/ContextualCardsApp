@@ -21,7 +21,8 @@ class HC9Card extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.all(16),
       height: height,
       width: width,
       decoration: BoxDecoration(

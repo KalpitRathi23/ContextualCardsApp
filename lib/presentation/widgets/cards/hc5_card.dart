@@ -16,7 +16,8 @@ class HC5Card extends StatelessWidget {
         final double height = width / aspectRatio;
 
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+          padding: const EdgeInsets.all(16),
           width: width,
           height: height,
           decoration: BoxDecoration(

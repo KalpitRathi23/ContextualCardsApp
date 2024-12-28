@@ -149,7 +149,7 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
             : 200;
 
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
           height: height,
           width: width,
           decoration: BoxDecoration(

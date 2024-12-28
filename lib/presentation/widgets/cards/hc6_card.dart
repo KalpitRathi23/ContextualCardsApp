@@ -14,7 +14,7 @@ class HC6Card extends StatelessWidget {
     final double aspectRatio = card.icon?.aspectRatio ?? 1.0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: card.bgColor ?? Colors.grey[300],

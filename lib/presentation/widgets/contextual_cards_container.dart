@@ -76,17 +76,69 @@ class ContextualCardsContainer extends StatelessWidget {
                       return SizedBox(
                         height: group.height?.toDouble() ?? 150,
                         child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           scrollDirection: Axis.horizontal,
                           itemCount: group.cards.length,
                           itemBuilder: (context, cardIndex) {
                             final card = group.cards[cardIndex];
-                            return HC9Card(
-                              card: card,
-                              height: group.height?.toDouble() ?? 150,
+                            return Row(
+                              children: [
+                                HC9Card(
+                                  card: card,
+                                  height: group.height?.toDouble() ?? 150,
+                                ),
+                                if (cardIndex < group.cards.length - 1)
+                                  const SizedBox(width: 14),
+                              ],
                             );
                           },
                         ),
                       );
+                    }
+
+                    if (group.designType == 'HC1') {
+                      if (group.isScrollable == true) {
+                        return SizedBox(
+                          height: 90,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: group.cards.length,
+                            itemBuilder: (context, cardIndex) {
+                              final card = group.cards[cardIndex];
+                              return Row(
+                                children: [
+                                  HC1Card(
+                                    card: card,
+                                    isScrollable: true,
+                                  ),
+                                  if (cardIndex < group.cards.length - 1)
+                                    const SizedBox(width: 12),
+                                ],
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: group.cards.map((card) {
+                              final double cardWidth =
+                                  (MediaQuery.of(context).size.width - 36) /
+                                      group.cards.length;
+                              return SizedBox(
+                                width: cardWidth,
+                                child: HC1Card(
+                                  card: card,
+                                  isScrollable: false,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      }
                     }
 
                     // Handle other card types
@@ -107,8 +159,6 @@ class ContextualCardsContainer extends StatelessWidget {
                             return HC6Card(card: card);
                           case 'HC5':
                             return HC5Card(card: card);
-                          case 'HC1':
-                            return HC1Card(card: card);
                           default:
                             debugPrint(
                                 'Unknown designType: ${group.designType}');
