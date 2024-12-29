@@ -18,7 +18,7 @@ class ContextualCardsContainer extends StatelessWidget {
           elevation: 0,
           flexibleSpace: Center(
             child: Padding(
-              padding: const EdgeInsets.only(top: 25),
+              padding: const EdgeInsets.only(top: 20),
               child: Image.asset(
                 'assets/fampaylogo.png',
                 height: 35,

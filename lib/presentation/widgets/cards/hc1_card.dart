@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:contextual_cards/data/models/entity.dart';
 import 'package:contextual_cards/utils/hex_color.dart';
+import 'package:contextual_cards/utils/url_launch.dart';
 
 class HC1Card extends StatelessWidget {
   final CardModel card;
@@ -14,71 +16,78 @@ class HC1Card extends StatelessWidget {
     const double iconHeight = 40.0;
     final double aspectRatio = card.icon?.aspectRatio ?? 1.0;
 
-    return Container(
-      width: isScrollable
-          ? MediaQuery.of(context).size.width - 50
-          : (MediaQuery.of(context).size.width - 65) / 2,
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: card.bgColor ?? Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Icon Section
-          if (card.icon != null)
-            SizedBox(
-              height: iconHeight,
-              width: iconHeight * aspectRatio,
-              child: Image.network(
-                card.icon!.imageUrl!,
-                fit: BoxFit.contain,
+    return GestureDetector(
+      onTap: () => URLLaunch.launchURL(card.url),
+      child: Container(
+        width: isScrollable
+            ? MediaQuery.of(context).size.width - 50
+            : (MediaQuery.of(context).size.width - 65) / 2,
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: card.bgColor ?? Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Icon Section
+            if (card.icon != null)
+              SizedBox(
+                height: iconHeight,
+                width: iconHeight * aspectRatio,
+                child: card.icon!.imageType == 'ext'
+                    ? Image.network(
+                        card.icon!.imageUrl!,
+                        fit: BoxFit.contain,
+                      )
+                    : card.icon!.assetType != null
+                        ? Image.asset(
+                            card.icon!.assetType!,
+                            fit: BoxFit.contain,
+                          )
+                        : const SizedBox.shrink(),
+              ),
+            const SizedBox(width: 16),
+
+            // Text Section
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment:
+                    _getTextAlignment(card.formattedTitle?.align ?? 'left'),
+                children: [
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: _buildFormattedText(
+                      card.formattedTitle?.text ?? card.title ?? '',
+                      card.formattedTitle?.entities ?? [],
+                      const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      card.formattedTitle?.align ?? 'left',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: _buildFormattedText(
+                      card.formattedDescription?.text ?? card.description ?? '',
+                      card.formattedDescription?.entities ?? [],
+                      const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                      card.formattedDescription?.align ?? 'left',
+                    ),
+                  ),
+                ],
               ),
             ),
-          const SizedBox(width: 16),
-
-          // Text Section
-          Expanded(
-            child: Column(
-              mainAxisSize:
-                  MainAxisSize.min, // Ensure the column wraps its children
-              crossAxisAlignment:
-                  _getTextAlignment(card.formattedTitle?.align ?? 'left'),
-              children: [
-                // Title and Entities
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: _buildFormattedText(
-                    card.formattedTitle?.text ?? card.title ?? '',
-                    card.formattedTitle?.entities ?? [],
-                    const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    card.formattedTitle?.align ?? 'left',
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // Description and Entities
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: _buildFormattedText(
-                    card.formattedDescription?.text ?? card.description ?? '',
-                    card.formattedDescription?.entities ?? [],
-                    const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                    card.formattedDescription?.align ?? 'left',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -98,22 +107,30 @@ class HC1Card extends StatelessWidget {
 
       if (i < entities.length && entities[i].text.isNotEmpty) {
         final entity = entities[i];
-        spans.add(TextSpan(
-          text: entity.text,
-          style: TextStyle(
-            color: entity.color != null
-                ? HexColor.fromHex(entity.color)
-                : baseStyle.color,
-            fontSize: entity.fontSize?.toDouble() ?? baseStyle.fontSize,
-            fontStyle: entity.fontStyle == "italic"
-                ? FontStyle.italic
-                : FontStyle.normal,
-            decoration: entity.fontStyle == "underline"
-                ? TextDecoration.underline
-                : TextDecoration.none,
-            fontWeight: baseStyle.fontWeight,
+        spans.add(
+          TextSpan(
+            text: entity.text,
+            style: TextStyle(
+              color: entity.color != null
+                  ? HexColor.fromHex(entity.color)
+                  : baseStyle.color,
+              fontSize: entity.fontSize?.toDouble() ?? baseStyle.fontSize,
+              fontStyle: entity.fontStyle == "italic"
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+              decoration: entity.fontStyle == "underline"
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
+              fontWeight: baseStyle.fontWeight,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                if (entity.url != null) {
+                  URLLaunch.launchURL(entity.url);
+                }
+              },
           ),
-        ));
+        );
       }
     }
 

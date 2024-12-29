@@ -1,7 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:contextual_cards/data/models/entity.dart';
 import 'package:contextual_cards/utils/hex_color.dart';
+import 'package:contextual_cards/utils/url_launch.dart';
 
 class HC3Card extends StatefulWidget {
   final CardModel card;
@@ -63,6 +67,7 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () => URLLaunch.launchURL(widget.card.url),
       onLongPress: _onLongPress,
       child: Stack(
         children: [
@@ -158,16 +163,25 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
               : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
           height: widget.isScrollable ? 420 : height,
           width: width,
+          // Image Section
           decoration: BoxDecoration(
-            color: widget.card.bgColor ?? Colors.grey[400],
+            color: widget.card.bgColor ?? Colors.white,
             borderRadius: BorderRadius.circular(12),
             image: widget.card.bgImage != null
-                ? DecorationImage(
-                    image: NetworkImage(widget.card.bgImage!.imageUrl!),
-                    fit: BoxFit.cover,
-                  )
+                ? widget.card.bgImage!.imageType == 'ext'
+                    ? DecorationImage(
+                        image: NetworkImage(widget.card.bgImage!.imageUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : widget.card.bgImage!.assetType != null
+                        ? DecorationImage(
+                            image: AssetImage(widget.card.bgImage!.assetType!),
+                            fit: BoxFit.cover,
+                          )
+                        : null
                 : null,
           ),
+          // Text Section
           child: Padding(
             padding: const EdgeInsets.fromLTRB(30, 16, 16, 28),
             child: Column(
@@ -191,10 +205,8 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
                   const SizedBox(height: 15),
                 if (widget.card.cta != null && widget.card.cta!.isNotEmpty)
                   ElevatedButton(
-                    onPressed: () {
-                      // Handle CTA action
-                      print("CTA Clicked: ${widget.card.cta![0].url}");
-                    },
+                    onPressed: () =>
+                        URLLaunch.launchURL(widget.card.cta![0].url),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         vertical: 15,
@@ -237,19 +249,27 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
       ));
       if (i < entities.length) {
         final entity = entities[i];
-        spans.add(TextSpan(
-          text: entity.text,
-          style: TextStyle(
-            color: HexColor.fromHex(entity.color) ?? Colors.black,
-            fontSize: entity.fontSize ?? 16,
-            fontStyle: entity.fontStyle == "italic"
-                ? FontStyle.italic
-                : FontStyle.normal,
-            decoration: entity.fontStyle == "underline"
-                ? TextDecoration.underline
-                : TextDecoration.none,
+        spans.add(
+          TextSpan(
+            text: entity.text,
+            style: TextStyle(
+              color: HexColor.fromHex(entity.color) ?? Colors.black,
+              fontSize: entity.fontSize ?? 16,
+              fontStyle: entity.fontStyle == "italic"
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+              decoration: entity.fontStyle == "underline"
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                if (entity.url != null) {
+                  URLLaunch.launchURL(entity.url);
+                }
+              },
           ),
-        ));
+        );
       }
     }
     return Text.rich(

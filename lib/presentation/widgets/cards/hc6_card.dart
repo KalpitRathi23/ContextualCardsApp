@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:contextual_cards/data/models/entity.dart';
 import 'package:contextual_cards/utils/hex_color.dart';
+import 'package:contextual_cards/utils/url_launch.dart';
 
 class HC6Card extends StatelessWidget {
   final CardModel card;
@@ -15,59 +17,71 @@ class HC6Card extends StatelessWidget {
     final double aspectRatio = card.icon?.aspectRatio ?? 1.0;
     final double width = iconHeight * aspectRatio;
 
-    return Container(
-      margin: isScrollable
-          ? const EdgeInsets.symmetric(vertical: 5)
-          : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: card.bgColor ?? Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Stack(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (card.icon != null)
-                SizedBox(
-                  height: iconHeight,
-                  width: width,
-                  child: Image.network(
-                    card.icon!.imageUrl!,
-                    fit: BoxFit.contain,
+    return GestureDetector(
+      onTap: () => URLLaunch.launchURL(card.url),
+      child: Container(
+        margin: isScrollable
+            ? const EdgeInsets.symmetric(vertical: 5)
+            : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: card.bgColor ?? Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Stack(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Icon Section
+                if (card.icon != null)
+                  SizedBox(
+                    height: iconHeight,
+                    width: width,
+                    child: card.icon!.imageType == 'ext'
+                        ? Image.network(
+                            card.icon!.imageUrl!,
+                            fit: BoxFit.contain,
+                          )
+                        : card.icon!.assetType != null
+                            ? Image.asset(
+                                card.icon!.assetType!,
+                                fit: BoxFit.contain,
+                              )
+                            : const SizedBox.shrink(),
                   ),
-                ),
-              const SizedBox(width: 6),
-              if (card.formattedTitle != null)
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: _buildFormattedText(
-                    card.formattedTitle!.text,
-                    card.formattedTitle!.entities,
-                    card.formattedTitle?.align ?? 'left',
-                  ),
-                )
-              else if (card.title?.trim().isNotEmpty == true)
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: Text(
-                    card.title!,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                const SizedBox(width: 6),
+                // Text Section
+                if (card.formattedTitle != null)
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: _buildFormattedText(
+                      card.formattedTitle!.text,
+                      card.formattedTitle!.entities,
+                      card.formattedTitle?.align ?? 'left',
+                    ),
+                  )
+                else if (card.title?.trim().isNotEmpty == true)
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      card.title!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          const Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: Icon(Icons.arrow_forward_ios, size: 16),
-          ),
-        ],
+              ],
+            ),
+            const Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: Icon(Icons.arrow_forward_ios, size: 16),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -86,20 +100,28 @@ class HC6Card extends StatelessWidget {
 
       if (i < entities.length) {
         final entity = entities[i];
-        spans.add(TextSpan(
-          text: entity.text,
-          style: TextStyle(
-            color: HexColor.fromHex(entity.color) ?? Colors.black,
-            fontSize: entity.fontSize ?? 18,
-            fontWeight: FontWeight.bold,
-            fontStyle: entity.fontStyle == "italic"
-                ? FontStyle.italic
-                : FontStyle.normal,
-            decoration: entity.fontStyle == "underline"
-                ? TextDecoration.underline
-                : TextDecoration.none,
+        spans.add(
+          TextSpan(
+            text: entity.text,
+            style: TextStyle(
+              color: HexColor.fromHex(entity.color) ?? Colors.black,
+              fontSize: entity.fontSize ?? 18,
+              fontWeight: FontWeight.bold,
+              fontStyle: entity.fontStyle == "italic"
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+              decoration: entity.fontStyle == "underline"
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                if (entity.url != null) {
+                  URLLaunch.launchURL(entity.url);
+                }
+              },
           ),
-        ));
+        );
       }
     }
 

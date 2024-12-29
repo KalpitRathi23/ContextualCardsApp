@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:contextual_cards/data/models/card_model.dart';
 import 'package:contextual_cards/data/models/entity.dart';
 import 'package:contextual_cards/utils/hex_color.dart';
+import 'package:contextual_cards/utils/url_launch.dart';
 
 class HC5Card extends StatelessWidget {
   final CardModel card;
@@ -19,35 +21,48 @@ class HC5Card extends StatelessWidget {
         final double aspectRatio = card.bgImage?.aspectRatio ?? 1.0;
         final double height = width / aspectRatio;
 
-        return Container(
-          margin: isScrollable
-              ? const EdgeInsets.symmetric(vertical: 5)
-              : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-          padding: const EdgeInsets.all(16),
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            image: card.bgImage != null
-                ? DecorationImage(
-                    image: NetworkImage(card.bgImage!.imageUrl!),
-                    fit: BoxFit.cover,
-                  )
-                : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: _getCrossAxisAlignment(
-                  card.formattedTitle?.align ?? 'center'),
-              children: [
-                _buildFormattedText(
-                  card.formattedTitle?.text ?? card.title ?? '',
-                  card.formattedTitle?.entities ?? [],
-                  card.formattedTitle?.align ?? 'center',
-                ),
-              ],
+        return GestureDetector(
+          onTap: () => URLLaunch.launchURL(card.url),
+          child: Container(
+            margin: isScrollable
+                ? const EdgeInsets.symmetric(vertical: 5)
+                : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+            padding: const EdgeInsets.all(16),
+            width: width,
+            height: height,
+            // Image Section
+            decoration: BoxDecoration(
+              color: card.bgColor ?? Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              image: card.bgImage != null
+                  ? card.bgImage!.imageType == 'ext'
+                      ? DecorationImage(
+                          image: NetworkImage(card.bgImage!.imageUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : card.bgImage!.assetType != null
+                          ? DecorationImage(
+                              image: AssetImage(card.bgImage!.assetType!),
+                              fit: BoxFit.cover,
+                            )
+                          : null
+                  : null,
+            ),
+            // Text Section
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: _getCrossAxisAlignment(
+                    card.formattedTitle?.align ?? 'center'),
+                children: [
+                  _buildFormattedText(
+                    card.formattedTitle?.text ?? card.title ?? '',
+                    card.formattedTitle?.entities ?? [],
+                    card.formattedTitle?.align ?? 'center',
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -73,19 +88,27 @@ class HC5Card extends StatelessWidget {
 
       if (i < entities.length && entities[i].text.isNotEmpty == true) {
         final entity = entities[i];
-        spans.add(TextSpan(
-          text: entity.text,
-          style: TextStyle(
-            color: HexColor.fromHex(entity.color) ?? Colors.white,
-            fontSize: entity.fontSize?.toDouble() ?? 20,
-            fontStyle: entity.fontStyle == "italic"
-                ? FontStyle.italic
-                : FontStyle.normal,
-            decoration: entity.fontStyle == "underline"
-                ? TextDecoration.underline
-                : TextDecoration.none,
+        spans.add(
+          TextSpan(
+            text: entity.text,
+            style: TextStyle(
+              color: HexColor.fromHex(entity.color) ?? Colors.white,
+              fontSize: entity.fontSize?.toDouble() ?? 20,
+              fontStyle: entity.fontStyle == "italic"
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+              decoration: entity.fontStyle == "underline"
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                if (entity.url != null) {
+                  URLLaunch.launchURL(entity.url);
+                }
+              },
           ),
-        ));
+        );
       }
     }
 

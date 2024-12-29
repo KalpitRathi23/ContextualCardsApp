@@ -187,7 +187,10 @@ Widget buildUnsupportedCard() {
       child: const Center(
         child: Text(
           'Unsupported card type.',
-          style: TextStyle(fontSize: 16, color: Colors.black),
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black,
+          ),
         ),
       ),
     ),

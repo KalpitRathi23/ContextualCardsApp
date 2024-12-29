@@ -30,7 +30,6 @@ class CardProvider extends ChangeNotifier {
             .map<CardGroup>((group) => CardGroup.fromJson(group))
             .toList();
 
-        // Apply filters for dismissed and remindLater cards
         final prefs = await SharedPreferences.getInstance();
         List<String> dismissedCards =
             prefs.getStringList('dismissedCards') ?? [];

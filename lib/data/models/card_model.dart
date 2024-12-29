@@ -16,6 +16,7 @@ class CardModel {
   final Color? bgColor;
   final GradientModel? bgGradient;
   final List<CallToAction>? cta;
+  final String? url;
 
   CardModel({
     this.id,
@@ -28,6 +29,7 @@ class CardModel {
     this.bgColor,
     this.bgGradient,
     this.cta,
+    this.url,
   });
 
   factory CardModel.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class CardModel {
               .map((cta) => CallToAction.fromJson(cta))
               .toList()
           : null,
+      url: json['url'] ?? '',
     );
   }
 }
