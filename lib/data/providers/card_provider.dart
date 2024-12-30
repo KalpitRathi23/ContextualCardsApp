@@ -25,38 +25,45 @@ class CardProvider extends ChangeNotifier {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-        List<CardGroup> fetchedGroups = data[0]['hc_groups']
-            .map<CardGroup>((group) => CardGroup.fromJson(group))
-            .toList();
+        try {
+          final data = json.decode(response.body) as List;
+          List<CardGroup> fetchedGroups = data[0]['hc_groups']
+              .map<CardGroup>((group) => CardGroup.fromJson(group))
+              .toList();
 
-        final prefs = await SharedPreferences.getInstance();
-        List<String> dismissedCards =
-            prefs.getStringList('dismissedCards') ?? [];
-        List<String> remindLaterCards =
-            prefs.getStringList('remindLaterCards') ?? [];
+          final prefs = await SharedPreferences.getInstance();
+          List<String> dismissedCards =
+              prefs.getStringList('dismissedCards') ?? [];
+          List<String> remindLaterCards =
+              prefs.getStringList('remindLaterCards') ?? [];
 
-        // Remove dismissed cards
-        for (var group in fetchedGroups) {
-          group.cards.removeWhere(
-              (card) => dismissedCards.contains(card.id.toString()));
-        }
-
-        // Remove remindLater cards unless reload flag is true
-        final reload = prefs.getBool('reload') ?? false;
-        if (!reload) {
+          // Remove dismissed cards
           for (var group in fetchedGroups) {
             group.cards.removeWhere(
-                (card) => remindLaterCards.contains(card.id.toString()));
+                (card) => dismissedCards.contains(card.id.toString()));
           }
+
+          // Remove remindLater cards unless reload flag is true
+          final reload = prefs.getBool('reload') ?? false;
+          if (!reload) {
+            for (var group in fetchedGroups) {
+              group.cards.removeWhere(
+                  (card) => remindLaterCards.contains(card.id.toString()));
+            }
+          }
+
+          // Update the card groups
+          cardGroups = fetchedGroups;
+
+          // Reset reload flag
+          prefs.setBool('reload', false);
+        } catch (e) {
+          debugPrint('Error processing response data: $e');
+          hasError = true;
         }
-
-        // Update the card groups
-        cardGroups = fetchedGroups;
-
-        // Reset reload flag
-        prefs.setBool('reload', false);
       } else {
+        debugPrint(
+            'Unexpected response: ${response.statusCode} - ${response.body}');
         hasError = true;
       }
     } catch (e) {

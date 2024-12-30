@@ -67,7 +67,11 @@ class ContextualCardsContainer extends StatelessWidget {
             }
 
             return RefreshIndicator(
-              onRefresh: provider.loadCards,
+              onRefresh: () async {
+                if (!provider.isLoading) {
+                  await provider.loadCards();
+                }
+              },
               color: Colors.black,
               child: Container(
                 decoration: const BoxDecoration(

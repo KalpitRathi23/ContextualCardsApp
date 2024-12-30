@@ -22,7 +22,11 @@ class HC5Card extends StatelessWidget {
         final double height = width / aspectRatio;
 
         return GestureDetector(
-          onTap: () => URLLaunch.launchURL(card.url),
+          onTap: () {
+            if (card.url != null) {
+              URLLaunch.launchURL(card.url);
+            }
+          },
           child: Container(
             margin: isScrollable
                 ? const EdgeInsets.symmetric(vertical: 5)
@@ -39,6 +43,8 @@ class HC5Card extends StatelessWidget {
                       ? DecorationImage(
                           image: NetworkImage(card.bgImage!.imageUrl!),
                           fit: BoxFit.cover,
+                          onError: (error, stackTrace) =>
+                              const Icon(Icons.error),
                         )
                       : card.bgImage!.assetType != null
                           ? DecorationImage(

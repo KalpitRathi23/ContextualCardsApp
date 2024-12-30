@@ -67,53 +67,79 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => URLLaunch.launchURL(widget.card.url),
+      onTap: () {
+        if (widget.card.url != null) {
+          URLLaunch.launchURL(widget.card.url);
+        }
+      },
       onLongPress: _onLongPress,
-      child: Stack(
-        children: [
-          if (_isSliding) _buildActionButtons(),
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              final double maxOffset = MediaQuery.of(context).size.width * 0.3;
-              return Transform.translate(
-                offset: Offset(_animationController.value * maxOffset, 0),
-                child: _buildCard(),
-              );
-            },
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          double width = widget.isScrollable
+              ? MediaQuery.of(context).size.width - 50
+              : constraints.maxWidth;
+          final double height = widget.card.bgImage?.aspectRatio != null
+              ? width / widget.card.bgImage!.aspectRatio!
+              : 420;
+
+          return Container(
+            margin: widget.isScrollable
+                ? const EdgeInsets.symmetric(vertical: 5)
+                : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+            height: widget.isScrollable ? 420 : height,
+            width: width,
+            decoration: BoxDecoration(
+              color: widget.card.bgColor ?? Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Stack(
+              children: [
+                if (_isSliding) _buildActionButtons(height),
+                AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    final double maxOffset =
+                        MediaQuery.of(context).size.width * 0.3;
+                    return Transform.translate(
+                      offset: Offset(_animationController.value * maxOffset, 0),
+                      child: _buildCardContent(width, height),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildActionButtons() {
-    return Positioned.fill(
-      child: Row(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.3,
-            color: Colors.white,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildActionButton(
-                  icon: Icons.notifications,
-                  text: "Remind Later",
-                  color: const Color(0xFFF7F6F3),
-                  onTap: () => _onActionSelected("remindLater"),
-                ),
-                const SizedBox(height: 20),
-                _buildActionButton(
-                  icon: Icons.close_rounded,
-                  text: "Dismiss Now",
-                  color: const Color(0xFFF7F6F3),
-                  onTap: () => _onActionSelected("dismissNow"),
-                ),
-              ],
+  Widget _buildActionButtons(double height) {
+    return Positioned(
+      top: 0,
+      bottom: 0,
+      left: 0,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.3,
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildActionButton(
+              icon: Icons.notifications,
+              text: "Remind Later",
+              color: const Color(0xFFF7F6F3),
+              onTap: () => _onActionSelected("remindLater"),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            _buildActionButton(
+              icon: Icons.close_rounded,
+              text: "Dismiss Now",
+              color: const Color(0xFFF7F6F3),
+              onTap: () => _onActionSelected("dismissNow"),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -147,91 +173,78 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildCard() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double width = widget.isScrollable
-            ? MediaQuery.of(context).size.width - 50
-            : constraints.maxWidth;
-        final double height = widget.card.bgImage?.aspectRatio != null
-            ? width / widget.card.bgImage!.aspectRatio!
-            : 420;
-
-        return Container(
-          margin: widget.isScrollable
-              ? const EdgeInsets.symmetric(vertical: 5)
-              : const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-          height: widget.isScrollable ? 420 : height,
-          width: width,
-          // Image Section
-          decoration: BoxDecoration(
-            color: widget.card.bgColor ?? Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            image: widget.card.bgImage != null
-                ? widget.card.bgImage!.imageType == 'ext'
+  Widget _buildCardContent(double width, double height) {
+    return Container(
+      //Image Section
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        image: widget.card.bgImage != null
+            ? widget.card.bgImage!.imageType == 'ext'
+                ? DecorationImage(
+                    image: NetworkImage(widget.card.bgImage!.imageUrl!),
+                    fit: BoxFit.cover,
+                    onError: (error, stackTrace) => const Icon(Icons.error),
+                  )
+                : widget.card.bgImage!.assetType != null
                     ? DecorationImage(
-                        image: NetworkImage(widget.card.bgImage!.imageUrl!),
+                        image: AssetImage(widget.card.bgImage!.assetType!),
                         fit: BoxFit.cover,
                       )
-                    : widget.card.bgImage!.assetType != null
-                        ? DecorationImage(
-                            image: AssetImage(widget.card.bgImage!.assetType!),
-                            fit: BoxFit.cover,
-                          )
-                        : null
-                : null,
-          ),
-          // Text Section
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(30, 16, 16, 28),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (widget.card.formattedTitle != null)
-                  _buildFormattedText(
-                    widget.card.formattedTitle!.text,
-                    widget.card.formattedTitle!.entities,
-                    _getTextAlign(widget.card.formattedTitle!.align),
+                    : null
+            : null,
+      ),
+      // Text Section
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(30, 16, 16, 28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.card.formattedTitle != null)
+              _buildFormattedText(
+                widget.card.formattedTitle!.text,
+                widget.card.formattedTitle!.entities,
+                _getTextAlign(widget.card.formattedTitle!.align),
+              ),
+            const SizedBox(height: 15),
+            if (widget.card.formattedDescription != null)
+              _buildFormattedText(
+                widget.card.formattedDescription!.text,
+                widget.card.formattedDescription!.entities,
+                _getTextAlign(widget.card.formattedDescription!.align),
+              ),
+            if (widget.card.cta != null && widget.card.cta!.isNotEmpty)
+              const SizedBox(height: 15),
+            if (widget.card.cta != null && widget.card.cta!.isNotEmpty)
+              ElevatedButton(
+                onPressed: () {
+                  if (widget.card.cta![0].url != null) {
+                    URLLaunch.launchURL(widget.card.cta![0].url);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 15,
+                    horizontal: 30,
                   ),
-                const SizedBox(height: 15),
-                if (widget.card.formattedDescription != null)
-                  _buildFormattedText(
-                    widget.card.formattedDescription!.text,
-                    widget.card.formattedDescription!.entities,
-                    _getTextAlign(widget.card.formattedDescription!.align),
+                  backgroundColor:
+                      HexColor.fromHex(widget.card.cta![0].bgColor) ??
+                          Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                if (widget.card.cta != null && widget.card.cta!.isNotEmpty)
-                  const SizedBox(height: 15),
-                if (widget.card.cta != null && widget.card.cta!.isNotEmpty)
-                  ElevatedButton(
-                    onPressed: () =>
-                        URLLaunch.launchURL(widget.card.cta![0].url),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: 30,
-                      ),
-                      backgroundColor:
-                          HexColor.fromHex(widget.card.cta![0].bgColor) ??
-                              Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    child: Text(
-                      widget.card.cta![0].text,
-                      style: TextStyle(
-                          color:
-                              HexColor.fromHex(widget.card.cta![0].textColor) ??
-                                  Colors.white),
-                    ),
+                ),
+                child: Text(
+                  widget.card.cta![0].text,
+                  style: TextStyle(
+                    color: HexColor.fromHex(widget.card.cta![0].textColor) ??
+                        Colors.white,
                   ),
-              ],
-            ),
-          ),
-        );
-      },
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 

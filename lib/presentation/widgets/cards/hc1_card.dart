@@ -17,7 +17,11 @@ class HC1Card extends StatelessWidget {
     final double aspectRatio = card.icon?.aspectRatio ?? 1.0;
 
     return GestureDetector(
-      onTap: () => URLLaunch.launchURL(card.url),
+      onTap: () {
+        if (card.url != null) {
+          URLLaunch.launchURL(card.url);
+        }
+      },
       child: Container(
         width: isScrollable
             ? MediaQuery.of(context).size.width - 50
@@ -40,6 +44,12 @@ class HC1Card extends StatelessWidget {
                     ? Image.network(
                         card.icon!.imageUrl!,
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.error,
+                          size: iconHeight,
+                          color: Colors.grey,
+                        ),
                       )
                     : card.icon!.assetType != null
                         ? Image.asset(

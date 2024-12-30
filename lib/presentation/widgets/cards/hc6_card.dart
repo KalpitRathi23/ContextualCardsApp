@@ -18,7 +18,11 @@ class HC6Card extends StatelessWidget {
     final double width = iconHeight * aspectRatio;
 
     return GestureDetector(
-      onTap: () => URLLaunch.launchURL(card.url),
+      onTap: () {
+        if (card.url != null) {
+          URLLaunch.launchURL(card.url);
+        }
+      },
       child: Container(
         margin: isScrollable
             ? const EdgeInsets.symmetric(vertical: 5)
@@ -42,6 +46,12 @@ class HC6Card extends StatelessWidget {
                         ? Image.network(
                             card.icon!.imageUrl!,
                             fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                              Icons.broken_image,
+                              size: iconHeight,
+                              color: Colors.grey,
+                            ),
                           )
                         : card.icon!.assetType != null
                             ? Image.asset(

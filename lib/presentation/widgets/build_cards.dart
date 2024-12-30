@@ -52,6 +52,9 @@ Widget buildHC1Group(BuildContext context, dynamic group) {
 
 Widget buildHC3Group(
     BuildContext context, dynamic group, CardProvider provider) {
+  if (group.cards.isEmpty) {
+    return const SizedBox(height: 5);
+  }
   if (group.isScrollable == true) {
     return SizedBox(
       height: 420,

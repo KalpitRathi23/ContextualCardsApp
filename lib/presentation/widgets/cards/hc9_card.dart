@@ -15,10 +15,14 @@ class HC9Card extends StatelessWidget {
     final double width =
         card.bgImage != null && card.bgImage!.aspectRatio != null
             ? height * card.bgImage!.aspectRatio!
-            : 100;
+            : 130;
 
     return GestureDetector(
-      onTap: () => URLLaunch.launchURL(card.url),
+      onTap: () {
+        if (card.url != null) {
+          URLLaunch.launchURL(card.url);
+        }
+      },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.all(16),
@@ -43,6 +47,7 @@ class HC9Card extends StatelessWidget {
                   ? DecorationImage(
                       image: NetworkImage(card.bgImage!.imageUrl!),
                       fit: BoxFit.cover,
+                      onError: (error, stackTrace) => const Icon(Icons.error),
                     )
                   : card.bgImage!.assetType != null
                       ? DecorationImage(
